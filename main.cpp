@@ -145,9 +145,7 @@ void solve()
 
     printf("\nИтараций: %d", currencyIterate);
 
-    printf("\nПогрешность:");
-     for(int i=1;i<=n;i++)
-        printf("\t%7.4f",errorRate[i]);
+
 
 }
 int main()
