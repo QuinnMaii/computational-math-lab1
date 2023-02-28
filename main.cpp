@@ -1,7 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <math.h>
-float a[21][21], b[21], accuracy, x[21], Deviation[21], errorRate[21], deviation[21];
+float a[21][21], b[21], accuracy, x[21], Deviation[21], errorRate[21], deviation[21],sum[21];
+float new_a[21][21],new_b[21];
 int how, n;
 void  nhap()
 {
@@ -23,6 +24,7 @@ void  nhap()
                 a[i][j]=t;
                 printf("b[%d]=",i);
                 scanf("%f",&b[i]);
+                sum[i]+=abs(a[i][j]);
             }
          }
     }
@@ -36,11 +38,17 @@ void  nhap()
             for(int j=1;j<=n;j++)
             {
                 scanf("%f",&a[i][j]);
+                sum[i]+=abs(a[i][j]);
             }
             scanf("%f",&b[i]);
         }
     }
-
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=n;j++)
+            new_a[i][j]=-100;
+        new_b[i]=-100;
+    }
 
 }
 
@@ -50,44 +58,38 @@ int check_dominant()
     for(int i=1;i<=n;i++)
     {
         t=0;
-        for(int j=1;j<=n;j++) t+=abs(a[i][j]);
-        if(t >= 2*abs(a[i][i]))
+        for(int j=1;j<=n;j++) t+=abs(new_a[i][j]);
+        if(t >= 2*abs(new_a[i][i]))
             return 0;
     }
-
+    for(int i=1;i<=n;i++)
+    {
+        for(int j=1;j<=n;j++)
+            a[i][j]=new_a[i][j];
+        b[i]=new_b[i];
+    }
     return 1;
 }
-bool make_diagonally_dominant()
-{
-    float new_a[21][21], new_b[21];
-    if(n>10)
-    {
-         printf("Перестановок для 11 элементов - 39916800.\n");
-         printf("Мы здесь просидим до утра.Я могу проверить только из источника.\n");
-         return check_dominant();
-    }
-    else
-    {
-        int arr[21];
-        for(int i=1;i<=n;i++)
-        {
-            arr[i]=i;
-            for(int j=1;j<=n;j++)
-                new_a[i][j]=a[i][j];
-            new_b[i]=b[i];
-        }
-        do
-         {
-            for(int i=1;i<=n;i++)
-            {
-                int x=arr[i];
-                for(int j=1;j<=n;j++)
-                    a[i][j]=new_a[x][j];
-                b[i]=new_b[x];
-            }
-            if(check_dominant()) return 1;
 
-        } while (std::next_permutation(arr+1,arr+n+1));
+bool make_diagonally_dominant(int x)
+{
+    if(x>n) return check_dominant();
+    for(int j=1;j<=n;j++)
+    {
+        if(new_b[j]==-100)
+        if(sum[x]<=2*abs(a[x][j]))
+        {
+            for(int k=1;k<=n;k++)
+                new_a[j][k]=a[x][k];
+            new_b[j]=b[x];
+            std::swap(sum[x],sum[j]);
+            return(make_diagonally_dominant(x+1));
+            for(int k=1;k<=n;k++)
+                new_a[j][k]=-100;
+            new_b[j]=-100;
+            std::swap(sum[x],sum[j]);
+
+        }
     }
     return 0;
 }
@@ -144,16 +146,15 @@ void solve()
         printf("\t%7.4f",x[i]);
 
     printf("\nИтараций: %d", currencyIterate);
- printf("\nПогрешность:");
+
+    printf("\nПогрешность:");
     for(int i=1;i<=n;i++) printf("\t%7.4f",errorRate[i]);
-
-
 
 }
 int main()
 {
     nhap();
-    if(!make_diagonally_dominant())
+    if(!make_diagonally_dominant(1))
         printf("\nНевозможно сделать диагональное доминирование из исходной матрицы");
     else solve();
 }
